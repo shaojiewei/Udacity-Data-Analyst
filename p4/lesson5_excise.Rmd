@@ -1,0 +1,120 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+```{r}
+data("diamonds")
+?diamonds
+dd <- data("diamonds")
+ggplot(aes(x = x, y = price), data= diamonds) +
+  geom_point() +
+  scale_x_continuous(limits = c(0,9),breaks = seq(0,9,1))
+  
+with(diamonds, cor.test(diamonds$x,diamonds$price, method = 'pearson'))
+with(diamonds, cor.test(diamonds$y,diamonds$price, method = 'pearson'))
+with(diamonds, cor.test(diamonds$z,diamonds$price, method = 'pearson'))
+
+ggplot(aes(x = depth, y = price), data= diamonds) +
+  geom_point(alpha = 1/100)+
+  scale_x_continuous(limits = c(55,70), breaks = seq(55,70,2))
+
+with(diamonds, cor.test(diamonds$depth,diamonds$price, method = 'pearson'))
+
+
+ggplot(aes(x = carat, y = price), 
+       data= subset(diamonds, diamonds$carat < quantile(diamonds$carat, probs = 0.99))) +
+  geom_point()
+
+diamonds$volume <- diamonds$x * diamonds$y *diamonds$z
+
+ggplot(aes(x = volume, y = price), data= diamonds) +
+  geom_point()
+
+install.packages('plyr')
+detach("package:plyr", unload=TRUE)
+count(diamonds$volume == 0)
+
+volume_diamonds <- subset(diamonds, diamonds$volume != 0 & diamonds$volume < 800)
+with(volume_diamonds, cor.test(volume_diamonds$volume,volume_diamonds$price, method = 'pearson'))
+cor(volume_diamonds)
+
+library(ggplot2)
+ggplot(aes(x = volume, y = price), data= diamonds) +
+  geom_point() +
+  geom_smooth()
+
+
+library('dplyr')
+
+diamondsByClarity <- diamonds %>%
+  group_by(clarity) %>%
+  summarise(mean_price = mean(price),
+            median_price = median(price),
+            min_price = min(price),
+            max_price = max(price),
+            n = n())
+
+
+
+diamonds_by_clarity <- group_by(diamonds, clarity)
+diamonds_mp_by_clarity <- summarise(diamonds_by_clarity, mean_price = mean(price))
+
+diamonds_by_color <- group_by(diamonds, color)
+diamonds_mp_by_color <- summarise(diamonds_by_color, mean_price = mean(price))
+
+getwd()
+setwd("G:/Udacity-DAND/Udacity-Data-Analyst/p4")
+p1 <- ggplot(aes(x = clarity, y = mean_price), data = diamonds_mp_by_clarity) +
+  geom_bar(stat = 'identity')
+p2 <- ggplot(aes(x = color, y = mean_price), data = diamonds_mp_by_color) +
+  geom_bar(stat = 'identity')
+library(gridExtra)
+grid.arrange(p1,p2, ncol = 1)
+```
+```{r}
+install.packages('openxlsx')
+library(openxlsx)
+install.packages('tidyr')
+library(tidyr)
+library(gridExtra)
+gdp.cap <- read.xlsx("indicatorwdigdp_percapita_growth.xlsx",1)
+investment <- read.xlsx("Investment.xlsx",1)
+
+gdp.cap <- gather(gdp.cap, "year","GDP",2:53)
+investment <- gather(investment, "year", "Investment", 2:53)
+
+names(gdp.cap)[[1]] <- "country"
+names(investment)[[1]] <- "country"
+
+gdp.investment <- inner_join(gdp.cap,investment, by=c("country","year"))
+gdp.investment <- filter(gdp.investment, !is.na(gdp.investment$Investment))
+gdp.investment <- filter(gdp.investment, !is.na(gdp.investment$GDP))
+
+cor.test(gdp.investment$Investment, gdp.investment$GDP)
+ggplot(data = gdp.investment, aes(x = Investment, y = GDP)) + geom_point(alpha = 1/5) + stat_smooth(method = lm, formula = y ~ x)
+```
+
