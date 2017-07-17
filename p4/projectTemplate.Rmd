@@ -1,4 +1,4 @@
-TITLE by YOUR_NAME_HERE
+Redwine by YOUR_NAME_HERE
 ========================================================
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, packages}
@@ -10,22 +10,204 @@ TITLE by YOUR_NAME_HERE
 # You should set echo=FALSE for all code chunks in your file.
 
 library(ggplot2)
+
+library(knitr)
+library(dplyr)
+library(gridExtra)
 ```
 
 ```{r echo=FALSE, Load_the_Data}
 # Load the Data
-
+redwine_df <- read.csv('wineQualityReds.csv')
+str(redwine_df)
 ```
+### 可以观察到变量’X‘表示序列号，对分析作用不大，因此，移除列‘X’
+```{r echo=FALSE, Load_the_Data}
+# remove the column 'X'
+redwine_df$X <- NULL
+summary(redwine_df)
+```
+### 初步可以观察到： 
+* 数据集有1599个对象，12个有效变量
+* 列’X‘对分析数据作用不大，所以移除
+* 质量（quality）是我主要关注的因素，而且有序的分类变量，红葡萄酒的评级是0-10，我们的样品范围是3-8，平均值5.636，中位数6
+* 所有其他变量都是连续变量
+
+### 因为要研究分类变量--质量，所以把它转成因子
+```{r echo=FALSE, Load_the_Data}
+# convert 'quality' into a factor
+redwine_df$quality <- factor(redwine_df$quality, ordered = T)
+str(redwine_df$quality)
+```
+```{r echo=FALSE, Load_the_Data}
+# view 'quality'
+table(redwine_df$quality)
+```
+
+### 从上面可以看出，样本的质量等级主要在5-7之间,接下来，看一下不同变量的分布情况 
+```{r echo=FALSE, Load_the_Data}
+# plot 
+p1<-ggplot(redwine_df,aes(x = fixed.acidity))+
+  geom_histogram()
+p2<-ggplot(redwine_df,aes(x = volatile.acidity))+
+  geom_histogram()
+p3<-ggplot(redwine_df,aes(x = citric.acid))+
+  geom_histogram()
+p4<-ggplot(redwine_df,aes(x = residual.sugar))+
+  geom_histogram()
+p5<-ggplot(redwine_df,aes(x = chlorides))+
+  geom_histogram()
+p6<-ggplot(redwine_df,aes(x = free.sulfur.dioxide))+
+  geom_histogram()
+p7<-ggplot(redwine_df,aes(x = total.sulfur.dioxide))+
+  geom_histogram()
+p8<-ggplot(redwine_df,aes(x = density))+
+  geom_histogram()
+p9<-ggplot(redwine_df,aes(x = pH))+
+  geom_histogram()
+p10<-ggplot(redwine_df,aes(x = sulphates))+
+  geom_histogram()
+p11<-ggplot(redwine_df,aes(x = alcohol))+
+  geom_histogram()
+p12<-ggplot(redwine_df,aes(x = quality))+
+  geom_bar()
+grid.arrange(p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,ncol=4)
+```
+### 从上面图中可以看出： 
+* 密度（density）异常值最少
 
 # Univariate Plots Section
 ```{r echo=FALSE, Univariate_Plots}
 
+
 ```
+```{r echo=FALSE, Univariate_Plots}
+summary(redwine_df)
+
+```
+### 我们的红酒数据集有13个变量，1599 个对象
+
+```{r echo=FALSE, Univariate_Plots}
+ggplot(aes(x = quality), data = redwine_df)+
+  geom_histogram()
+
+```
+
+```{r echo=FALSE, Univariate_Plots}
+summary(redwine_df$quality)
+
+```
+### 质量（quality）评级都是整数，且分布近似于正态分布，评级5、6最多，3，8最少，中位数是6，平均数是5.636，我们再看一下其他变量的分布情况
+```{r echo=FALSE, Univariate_Plots}
+ggplot(aes(x = pH), data = redwine_df)+
+  geom_histogram()
+
+```
+### pH值的分布情况也近似于正态分布，且3.0至3.5之间最多，还有一些在4.0以上，这可能是异常值
+
+```{r echo=FALSE, Univariate_Plots}
+ggplot(aes(x = alcohol), data = redwine_df)+
+  geom_histogram()
+
+```
+### 酒精度（alcohod）的分布类似正偏斜分布，9.2最多
+
+```{r echo=FALSE, Univariate_Plots}
+ggplot(aes(x = sulphates), data = redwine_df)+
+  geom_histogram()
+
+```
+```{r echo=FALSE, Univariate_Plots}
+
+qplot(x = sulphates, data = redwine_df,binwidth = 0.01)
+
+```
+### 硫酸盐分布主要集中在0.5-0.75之间，在1.5，2.0左右都有一些少量分布，可能是异常值,让我们再看一下非挥发性酸（fixed.acidity）、挥发性酸（volatile.acidity）、柠檬酸（citric.acid）的情况
+```{r echo=FALSE, Univariate_Plots}
+ggplot(aes(x = fixed.acidity), data = redwine_df)+
+  geom_histogram()
+
+```
+```{r echo=FALSE, Univariate_Plots}
+ggplot(aes(x = volatile.acidity), data = redwine_df)+
+  geom_histogram()
+
+```
+```{r echo=FALSE, Univariate_Plots}
+ggplot(aes(x = citric.acid), data = redwine_df)+
+  geom_histogram()
+
+```
+```{r echo=FALSE, Univariate_Plots}
+qplot(x = citric.acid, data = redwine_df,binwidth = 0.01)
+
+
+```
+### 非挥发性酸（fixed.acidity）主要在6-10之间，挥发性酸（volatile.acidity）多数在0.2-0.8之间，柠檬酸（citric.acid）主体分布比较均匀，但其中，0最多，不含柠檬酸（citric.acid）最多，可能有错误数据,需要再探究一下
+```{r echo=FALSE, Univariate_Plots}
+summary(redwine_df$citric.acid == 0)
+
+```
+### 有132瓶红酒丢失柠檬酸数据（citric.acid）
+```{r echo=FALSE, Univariate_Plots}
+ggplot(aes(x = residual.sugar), data = redwine_df)+
+  geom_histogram()
+
+```
+```{r echo=FALSE, Univariate_Plots}
+summary(redwine_df$residual.sugar)
+
+```
+### 残留糖分（residual.sugar）主要分布在1.9-2.6之间,最小是0.9，最大是15.5
+```{r echo=FALSE, Univariate_Plots}
+ggplot(aes(x = chlorides), data = redwine_df)+
+  geom_histogram()
+
+```
+```{r echo=FALSE, Univariate_Plots}
+summary(redwine_df$chlorides)
+
+```
+
+### 氯化物（chlorides）多数在0.07-0.09之间，最大值是0.611，最小值是0.012
+```{r echo=FALSE, Univariate_Plots}
+ggplot(aes(x = free.sulfur.dioxide), data = redwine_df)+
+  geom_histogram()
+
+```
+
+```{r echo=FALSE, Univariate_Plots}
+ggplot(aes(x = total.sulfur.dioxide), data = redwine_df)+
+  geom_histogram()
+
+```
+```{r echo=FALSE, Univariate_Plots}
+summary(redwine_df$free.sulfur.dioxide)
+
+```
+```{r echo=FALSE, Univariate_Plots}
+summary(redwine_df$total.sulfur.dioxide)
+
+```
+
+### 游离二氧化硫（free.sulfur.dioxide)多数分布在7-21之间，最大值是72，最小值是1。总二氧化硫（total.sulfur.dioxide）多分布在22-62之间，最大值是289，最小值是6
+
+```{r echo=FALSE, Univariate_Plots}
+ggplot(aes(x = density), data = redwine_df)+
+  geom_histogram()
+
+```
+```{r echo=FALSE, Univariate_Plots}
+summary(redwine_df$density)
+
+```
+### 密度（density）成正态分布，最大值是1.0037，最小值是0.9901
 
 # Univariate Analysis
 
 ### What is the structure of your dataset?
-
+#### 红酒数据集有1599个对象，13个变量
+* 质量中位数是6，平均中位数是5.636
 ### What is/are the main feature(s) of interest in your dataset?
 
 ### What other features in the dataset do you think will help support your investigation into your feature(s) of interest?
