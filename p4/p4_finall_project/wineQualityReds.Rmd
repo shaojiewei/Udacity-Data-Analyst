@@ -1,0 +1,584 @@
+---
+output:
+  html_document: default
+  pdf_document: default
+---
+WineQualityReds EDA by Shao Jiewei
+========================================================
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, packages}
+# Load all of the packages that you end up using
+# in your analysis in this code chunk.
+
+# Notice that the parameter "echo" was set to FALSE for this code chunk.
+# This prevents the code from displaying in the knitted HTML output.
+# You should set echo=FALSE for all code chunks in your file.
+
+library(ggplot2)
+library(knitr)
+library(gridExtra)
+library(corrplot)
+```
+加载数据
+```{r echo=FALSE, Load_the_Data}
+# 加载数据
+redwine_df <- read.csv('wineQualityReds.csv')
+
+# 查看变量情况
+str(redwine_df)
+```
+可以观察到变量’X‘表示序列号，对分析作用不大，因此，移除列‘X’
+```{r echo=FALSE, warning=FALSE}
+# 移除列 ‘X’
+redwine_df$X <- NULL
+summary(redwine_df)
+```
+
+* 数据集有1599个对象，12个有效变量
+* 列’X‘对分析数据作用不大，所以移除
+* 质量（quality）是我主要关注的因素，红葡萄酒的评级是0-10，我们的样品范围是3-8，平均值5.636，中位数6
+* 所有其他变量都是连续变量
+
+
+# Univariate Plots Section
+
+要研究不同化学成分对quality的影响，先看一下quality的分布情况
+```{r echo=FALSE}
+#  绘制‘quliaty’ 条形图
+ggplot(redwine_df,aes(x = quality))+
+  geom_bar()
+```
+
+```{r echo=FALSE}
+# 计算品质为5和6的红酒的占比情况
+dim(subset(redwine_df, quality == 5 | quality == 6| quality == 7))/dim(redwine_df)
+```
+从上面可以看出，样本的质量等级主要集中在5-6之间,占总数的94.9%接下来，接下来统一看一下不同变量的大致分布情况 
+
+```{r echo=FALSE}
+# 绘制所有单变量的直方图 
+p1<-ggplot(redwine_df,aes(x = fixed.acidity))+
+  geom_histogram()
+p2<-ggplot(redwine_df,aes(x = volatile.acidity))+
+  geom_histogram()
+p3<-ggplot(redwine_df,aes(x = citric.acid))+
+  geom_histogram()
+p4<-ggplot(redwine_df,aes(x = residual.sugar))+
+  geom_histogram()
+p5<-ggplot(redwine_df,aes(x = chlorides))+
+  geom_histogram()
+p6<-ggplot(redwine_df,aes(x = free.sulfur.dioxide))+
+  geom_histogram()
+p7<-ggplot(redwine_df,aes(x = total.sulfur.dioxide))+
+  geom_histogram()
+p8<-ggplot(redwine_df,aes(x = density))+
+  geom_histogram()
+p9<-ggplot(redwine_df,aes(x = pH))+
+  geom_histogram()
+p10<-ggplot(redwine_df,aes(x = sulphates))+
+  geom_histogram()
+p11<-ggplot(redwine_df,aes(x = alcohol))+
+  geom_histogram()
+p12<-ggplot(redwine_df,aes(x = quality))+
+  geom_bar()
+
+# 网格展示
+grid.arrange(p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,ncol=4)
+```
+
+从上面图中可以初步看出：  
+* 密度（density）异常值最少  
+* 密度、pH值近似正态分布
+
+```{r echo=FALSE}
+# 绘制 fixed.acidity 直方图
+ggplot(redwine_df, aes(x = fixed.acidity)) +
+  geom_histogram(binwidth = 0.1) +
+  scale_x_continuous(breaks = seq(4, 16, by = 1))
+
+```
+```{r echo=FALSE}
+# 查看 fixed.acidity 的统计学数据
+summary(redwine_df$fixed.acidity)
+
+```
+* 非挥发性酸（fixed.acidity）近似正态分布 
+* 主要分布在6-9.2之间,平均值是8.32，中位数是7.9
+```{r echo=FALSE}
+# 绘制 volatile.acidity 直方图
+pp1 <- ggplot(redwine_df, aes(x = volatile.acidity)) +
+  geom_histogram(binwidth = 0.02) +
+  scale_x_continuous(breaks = seq(0, 1.6, by = 0.1))
+
+# 绘制 volatile.acidity log10直方图
+pp2 <- ggplot(redwine_df, aes(x = volatile.acidity)) +
+  geom_histogram(binwidth = 0.02) +
+  scale_x_log10(breaks = seq(0, 1.6, by = 0.5))
+
+# 网格展示
+grid.arrange(pp1, pp2)
+  
+
+```
+* 挥发性酸（volatile.acidity）分布近似双峰分布，峰顶大概在0.4,和0.57
+* 多数分布在0.3 - 0.7之间
+* 取log10 之后，图形近似正态分布
+
+
+```{r echo=FALSE}
+# 绘制 pH 直方图
+p1 <- ggplot(redwine_df, aes(x = pH)) +
+  geom_histogram(binwidth = 0.02)
+
+# 绘制 free.sulfur.dioxide 直方图
+p2 <- ggplot(redwine_df, aes(x = free.sulfur.dioxide)) +
+  geom_histogram(binwidth = 1)
+
+# 绘制 total.sulfur.dioxide 直方图
+p3 <- ggplot(redwine_df, aes(x = total.sulfur.dioxide)) +
+  geom_histogram(binwidth = 3)
+
+# 绘制 alcohol 直方图
+p4 <- ggplot(redwine_df, aes(x = alcohol)) +
+  geom_histogram(binwidth = 0.1)
+
+# 网格展示
+grid.arrange(p1, p2, p3, p4, ncol = 2)
+
+```
+
+
+* pH近似正态分布，多数值处于3-5之间
+* 游离二氧化硫（free.sulfur.dioxide）,总二氧化硫（total.sulfur.dioxide）,酒精（alcohol）近似左偏斜
+* 游离二氧化硫（free.sulfur.dioxide）多位于 1 - 40 之间
+* 总二氧化硫（total.sulfur.dioxide） 多位于 3 - 100 之间
+* 酒精（alcohol） 多位于 8 - 13 之间
+
+```{r echo=FALSE}
+
+# 绘制 residual.sugar 直方图
+ggplot(aes(x = residual.sugar), data = redwine_df)+
+  geom_histogram(binwidth = 0.1) +
+  scale_x_continuous(breaks = seq(0, 16, by = 1))
+
+```
+
+* 残糖（residual.sugar）左偏斜很明显，绝大多数低于7
+```{r echo=FALSE}
+
+# 绘制 citric.acid 直方图
+ggplot(redwine_df, aes(x = citric.acid)) +
+  geom_histogram(binwidth = 0.02)+
+  scale_x_continuous(breaks = seq(0, 1, by = 0.05))
+
+```
+```{r echo=FALSE}
+# 查看 citric.acid 统计学数据
+summary(redwine_df$citric.acid == 0)
+
+```
+* 可以看出，柠檬酸（citric.acid）多数处于0-0.5之间，且其中有132份红酒不含有柠檬酸（citric.acid）
+```{r echo=FALSE}
+
+# 绘制 chlorides 直方图
+ggplot(redwine_df, aes(x = chlorides)) +
+  geom_histogram(binwidth = 0.01)+
+  scale_x_continuous(breaks = seq(0, 0.6, by = 0.05))
+
+```
+```{r echo=FALSE}
+
+# 查看 chlorides 统计学数据
+summary(redwine_df$chlorides)
+
+```
+* 氯化物（chlorides）多处于0-0.15之间,最小值是0.012，最大值是0.611
+
+```{r echo=FALSE}
+
+# 绘制 density 直方图
+ggplot(redwine_df, aes(x = density)) +
+  geom_histogram()
+
+```
+
+* 密度（density）分布近似正态分布，多数位于0.992-1之间
+
+```{r echo=FALSE}
+
+# 绘制 sulphates 直方图
+ggplot(redwine_df, aes(x = sulphates)) +
+  geom_histogram(binwidth = 0.02)
+
+```
+
+```{r echo=FALSE}
+# 查看 chlorides 统计学数据
+summary(redwine_df$sulphates)
+
+```
+* 硫酸盐（sulphates）多位于0.33-0.73之间，中位数是0.62， 平均值是0.6581
+
+
+# Univariate Analysis
+
+### What is the structure of your dataset?
+* 红酒数据集有1599个对象，1个无效变量（X),12个有效变量(fixed.acidity,volatile.acidity, citric.acid, residual.sugar, chlorides, free.sulfur.dioxide,  total.sulfur.dioxide, density, pH, sulphates, alcohol, quality)
+* 质量等级主要集中在5、6、7
+* 残糖（residual.sugar）多在7以下
+* 酒精多位于8-13之间
+
+
+### What is/are the main feature(s) of interest in your dataset?
+
+数据集中的主要特征是酒精（alcohol）、质量(quality)，我要找出哪些化学成分影响红葡萄酒的质量，我觉得酒精(alcohol)、残糖（residual.sugar）、挥发性酸（volatile.acidity）可能主要影响红酒质量
+
+### What other features in the dataset do you think will help support your investigation into your feature(s) of interest?
+
+氯化物（chlorides）、硫酸盐（sulphates）、pH值、密度（density）都可能影响红酒质量
+
+### Did you create any new variables from existing variables in the dataset?
+没有创造新变量
+
+### Of the features you investigated, were there any unusual distributions? Did you perform any operations on the data to tidy, adjust, or change the form of the data? If so, why did you do this?
+
+* 非挥发性酸（fixed.acideity）、挥发性酸（volatile.acidity）、游离二氧化硫（free.sulfur.dioxide）、总二氧化硫（total.sulfur.dioxide）直方分布图中，异常值比较多。
+* 挥发性酸（volatile.acidity）成双峰分布，取log10后，又呈正态分布。
+* 132份红酒不含柠檬酸（citric.acid）
+* 对一些异常值较多的分布，通过scale_x_continue对X轴进行缩放，查看数据情况
+
+
+
+# Correlation Graph
+```{r echo=FALSE}
+# 绘制数据集变量的相关系数图
+M <- cor(redwine_df)
+corrplot(M, method = "number")
+```
+
+对数据集进行相关性分析，根据相关图可以看出，quality跟volatile.acidity成一定的负相关，跟alcohol、citric.acid、sulphates成正相关，接下来重点对这几个变量进行双变量分析
+
+# Bivariate Plots Section
+
+根据相关性分析，找到4个与质量（quality）相关性比较强的变量，首先分析quality跟volatile.acidity
+
+## quality & volatile.acidity
+```{r echo=FALSE, Bivariate_Plots, warning=FALSE}
+# 绘制quality & volatile.acidity的箱线图
+ggplot(data = redwine_df, aes(x = factor(quality), y = volatile.acidity)) +
+  geom_boxplot()
+```
+```{r echo=FALSE, warning=FALSE}
+
+# 计算quality & volatile.acidity的相关系数
+cor.test(redwine_df$quality, redwine_df$volatile.acidity, method = 'pearson')
+```
+
+根据箱线图可以看出，质量（quality）越高，挥发性酸（volatile.acidity)越低，两者呈负相关，相关系数-0.39
+
+## quality & alcohol
+
+```{r echo=FALSE, warning=FALSE}
+# 绘制quality & alcohol的箱线图
+ggplot(data = redwine_df, aes(x = factor(quality), y = alcohol)) +
+  geom_boxplot()
+```
+```{r echo=FALSE, warning=FALSE}
+
+# 计算quality & alcohol的相关系数
+cor.test(redwine_df$quality, redwine_df$alcohol, method = 'pearson')
+```
+
+根据箱线图可以看出，quality在等级5之前，随等级增加，alcohol逐渐减少，减少幅度不大，在等级5之后，逐渐增加，相关系数 0.476，呈正相关
+
+## quality & citric.acid
+
+```{r echo=FALSE, warning=FALSE}
+# 绘制quality & citric.acid
+ggplot(data = redwine_df, aes(x = factor(quality), y = citric.acid)) +
+  geom_boxplot()
+```
+
+```{r echo=FALSE, warning=FALSE}
+
+# 计算quality & citric.acid的相关系数
+cor.test(redwine_df$quality, redwine_df$citric.acid, method = 'pearson')
+```
+
+citric.acid与quality呈弱的正相关，相关系数为0.22，quality随citric.acid的增长而增长
+
+## quality & sulphates
+
+```{r echo=FALSE, warning=FALSE}
+# 绘制quality & citric.acid
+ggplot(data = redwine_df, aes(x = factor(quality), y = sulphates)) +
+  geom_boxplot()
+```
+
+```{r echo=FALSE, warning=FALSE}
+
+# 计算quality & citric.acid的相关系数
+cor.test(redwine_df$quality, redwine_df$sulphates, method = 'pearson')
+```
+
+sulphates与quality呈弱的正相关，相关系数为0.22，quality随citric.acid的增长而增长
+
+# Bivariate Analysis
+
+### Talk about some of the relationships you observed in this part of the investigation. How did the feature(s) of interest vary with other features in the dataset?
+
+红酒数据集中，quality跟volatile.acidity成负相关，跟alcohol、citric.acid、sulphates成正相关,其中alcohol与quality之间存在较强的相关性，其他三个变量与quality之间存在较弱的相关性。
+
+### Did you observe any interesting relationships between the other features (not the main feature(s) of interest)?
+
+原以为residual.sugar也是影响quality的重要因素，却不是，反而是sulphates，citric.acid与quality相关性较大
+
+### What was the strongest relationship you found?
+
+fixed.acidity与pH 相关性最大,达到-0.68，非挥性酸本身就会影响pH值，可以理解
+
+# Multivariate Plots Section
+
+根据上面的分析结果，我们发现alcohol与quality之间存在较强的相关性，接下来我们探索一下alcohol与quality和volatile.acidity、citric.acid、sulphates之间的关系
+
+```{r echo=FALSE, Multivariate_Plots, warning=FALSE}
+# 绘制alcohol vs quality vs volatile.acidity
+ggplot(aes(x = alcohol, y = volatile.acidity, color = factor(quality)), data = redwine_df) +
+geom_jitter(alpha = 0.2) +
+scale_color_brewer(palette = "Blues") +
+ylim(0.2,0.9) +
+geom_smooth(method = "lm", se = FALSE,size=1) 
+```
+```{r echo=FALSE, warning=FALSE}
+# 绘制alcohol & quality 与citric.acid的散点图 
+ggplot(aes(x = alcohol, y = citric.acid, color = factor(quality)), data = redwine_df) +
+geom_jitter(alpha = 0.2) +
+scale_color_brewer(palette = "Blues") +
+ylim(0,0.8) +
+geom_smooth(method = "lm", se = FALSE,size=1) 
+  
+```
+```{r echo=FALSE, warning=FALSE}
+# 绘制alcohol & quality 与sulphates的散点图
+ggplot(aes(x = alcohol, y = sulphates, color = factor(quality)), data = redwine_df) +
+geom_jitter(alpha = 0.2) +
+scale_color_brewer(palette = "Blues") +
+ylim(0.3,1.0) +
+geom_smooth(method = "lm", se = FALSE,size=1) 
+  
+```
+
+通过以上散点图可以看出：
+
+* citric.acid、alcohol越高，quality越高。
+
+* sulphates、alcohol越高，quality越高，它们呈正相关。
+
+* volatile.acidity 越低，quality 越高，呈负相关
+
+
+
+## volatile.acidity & quality 与 alcohol、citric.acid、sulphates
+
+
+```{r echo=FALSE, warning=FALSE}
+# 绘制volatile.acidity vs quality vs alcohol的散点图
+ggplot(aes(x = volatile.acidity, y = alcohol, color = factor(quality)), data = redwine_df) +
+geom_jitter(alpha = 0.2) +
+scale_color_brewer(palette = "Purples") +
+xlim(0.2,0.9) +
+geom_smooth(method = "lm", se = FALSE,size=1) 
+```
+
+```{r echo=FALSE, warning=FALSE}
+# 绘制volatile.acidity vs quality vs citric.acid的散点图
+ggplot(aes(x = volatile.acidity, y = citric.acid, color = factor(quality)), data = redwine_df) +
+geom_jitter(alpha = 0.2) +
+scale_color_brewer(palette = "Purples") +
+xlim(0.2,0.9) +
+ylim(0,0.8)+
+geom_smooth(method = "lm", se = FALSE,size=1)   
+```
+
+```{r echo=FALSE, warning=FALSE}
+# 绘制volatile.acidity vs quality vs sulphates的散点图
+ggplot(aes(x = volatile.acidity, y = sulphates, color = factor(quality)), data = redwine_df) +
+geom_jitter(alpha = 0.2) +
+scale_color_brewer(palette = "Purples") +
+xlim(0.2,0.9) +
+ylim(0.3,1.0)+
+geom_smooth(method = "lm", se = FALSE,size=1)  
+  
+```
+
+可以看出volatile.acidity越低，红葡萄酒的品质越好。
+
+```{r echo=FALSE, warning=FALSE}
+# 绘制citric.acid vs quality vs alcohol的散点图
+ggplot(aes(x = citric.acid, y = alcohol, color = factor(quality)), data = redwine_df) +
+geom_jitter(alpha = 0.3) +
+scale_color_brewer(palette = "Oranges") +
+xlim(0,0.8) +
+geom_smooth(method = "lm", se = FALSE,size=1) 
+  
+``` 
+```{r echo=FALSE, warning=FALSE}
+# 绘制citric.acid vs quality vs volatile.acidity的散点图
+ggplot(aes(x = citric.acid, y = volatile.acidity, color = factor(quality)), data = redwine_df) +
+geom_jitter(alpha = 0.3) +
+scale_color_brewer(palette = "Oranges") +
+xlim(0,0.8) +
+ylim(0.2,1.0)+
+geom_smooth(method = "lm", se = FALSE,size=1) 
+  
+```
+
+```{r echo=FALSE, warning=FALSE}
+# 绘制citric.acid vs quality vs sulphates的散点图
+ggplot(aes(x = citric.acid, y = sulphates, color = factor(quality)), data = redwine_df) +
+geom_jitter(alpha = 0.3) +
+scale_color_brewer(palette = "Oranges") +
+xlim(0,0.8) +
+ylim(0.3,1.0)+
+geom_smooth(method = "lm", se = FALSE,size=1) 
+```
+
+可以看出citric.acid对红酒品质没有明显的影响
+
+```{r echo=FALSE, warning=FALSE}
+# 绘制sulphates vs quality vs alcohol的散点图
+ggplot(aes(x = sulphates , y = alcohol, color = factor(quality)), data = redwine_df) +
+geom_jitter(alpha = 0.3) +
+scale_color_brewer(palette = "Greens") +
+xlim(0.3,1.0)+
+geom_smooth(method = "lm", se = FALSE,size=1) 
+  
+``` 
+```{r echo=FALSE, warning=FALSE}
+# 绘制sulphates vs quality vs volatile.acidity的散点图
+ggplot(aes(x = sulphates , y = volatile.acidity, color = factor(quality)), data = redwine_df) +
+geom_jitter(alpha = 0.3) +
+scale_color_brewer(palette = "Greens") +
+xlim(0.3,1.0)+
+ylim(0.2,1.0) +
+geom_smooth(method = "lm", se = FALSE,size=1) 
+``` 
+
+```{r echo=FALSE, warning=FALSE}
+# 绘制sulphates vs quality vs citric.acid的散点图
+ggplot(aes(x = sulphates , y = citric.acid, color = factor(quality)), data = redwine_df) +
+geom_jitter(alpha = 0.3) +
+scale_color_brewer(palette = "Greens") +
+xlim(0.3,1.0)+
+ylim(0,0.8) +
+geom_smooth(method = "lm", se = FALSE,size=1)  
+``` 
+
+可以看出，sulphates越高，红葡萄酒的品质越好
+
+# Multivariate Analysis
+
+### Talk about some of the relationships you observed in this part of the investigation. Were there features that strengthened each other in terms of looking at your feature(s) of interest?
+
+alcohol有助于红酒的品质，sulphates也会对葡萄酒的品质产生积极影响，volatile.acidity越低葡萄酒的品质越好。
+
+### Were there any interesting or surprising interactions between features?
+
+citric.acid单独对红酒品质影响有限，但citric.acid和alcohol值较高时，对葡萄酒的品质能产生积极影响。
+### OPTIONAL: Did you create any models with your dataset? Discuss the strengths and limitations of your model.
+
+
+
+# Final Plots and Summary
+
+### Plot One
+```{r echo=FALSE, Plot_One, warning=FALSE}
+# 绘制 quality 条形图
+ggplot(aes(x = quality), data = redwine_df) +
+  geom_bar()+
+  xlab("Red wine quality")+
+  ylab("Numbers of red wine")+
+  scale_y_continuous(breaks = seq(0,1000,50))+
+  labs(title = "Distribution of red wine quality")
+```
+
+### Description One
+
+数据集说明，占总数94.9%的红酒质量等级集中在5、6、7
+
+### Plot Two
+
+### alcohol & quality 与volatile.acidity
+```{r echo=FALSE, Plot_Two, warning=FALSE}
+# 绘制alcohol vs quality vs volatile.acidity的散点图
+ggplot(aes(x = alcohol, y = volatile.acidity, color = factor(quality)), data = redwine_df) +
+geom_jitter(alpha = 0.3) +
+scale_color_brewer(palette = "Blues") +
+geom_smooth(method = "lm", se = FALSE,size=1) +
+ylim(0.2,0.9) +
+labs(y = 'volatile.acidity(g / dm^3)',x = 'Alcohol(% by volume)') +
+ggtitle("volatile.acidity VS alcohol VS quality")
+```
+
+### Description Two
+
+* 可以看到alcohol和volatile.acidity与葡萄酒的质量密切相关。
+
+* 它们呈现强相关性,从这个散点图可以看出，alcohol与葡萄酒的品质正相关。
+
+* alcohol含量越高，葡萄酒质量越好。
+
+### Plot Three
+### alcohol & quality 与sulphatese
+```{r echo=FALSE, Plot_Three, warning=FALSE}
+# 绘制alcohol vs quality vs sulphates散点图
+ggplot(aes(x = alcohol, y = sulphates, color = factor(quality)), data = redwine_df) +
+geom_jitter(alpha = 0.3) +
+scale_color_brewer(palette = "Blues") +
+ylim(0.3,1.0) +
+geom_smooth(method = "lm", se = FALSE,size=1) +
+xlab("Alcohol(% by volume)") +
+ylab("Sulphates(g / dm3)") +
+ggtitle("alcohol VS quality VS sulphates")
+```
+
+### Description Three
+
+* 这个散点图显示了alcohol、sulphates与葡萄酒质量关系的清晰说明，它表明酒精和硫酸盐与葡萄酒的品质呈正相关。
+
+* 较高的alcohol、sulphates会对葡萄酒品质产生积极影响。
+
+# Reflection
+
+红酒数据集包含1599个观测值，13个变量,在此分析中，我的主要目标是找出哪些元素会影响红葡萄酒的质量。我发现其中1个变量是序列号，12是有效变量。
+
+在单变量分析中，对各种指标绘制了其直方图。我们观察到94.9％的葡萄酒质量集中在5、6、7，其他直方图我们无法得到一个明确的结论。然后绘制了一个相关图，通过相关图我们能够分析出alcohol，volatile.acidity，citric.acid，sulphates与葡萄酒的品质相关。
+
+在双变量分析中，我们绘制了相关变量的箱线图并得到如下结论：
+
+以下因素会对葡萄酒的品质产生积极影响：
+
+1. 挥发性低的酸性（volatile.acidity）
+
+2. 高水平的酒精（alcohol）
+
+3. 高水平的柠檬酸(citric.acid)
+
+4. 高硫酸盐值(sulphate)
+
+在多变量分析中，绘制了散点图。
+
+通过绘制这几个与质量相关的变量散点图，我们了解高硫酸盐和高酒精，高柠檬酸和高酒精，低挥发性酸度，高硫酸盐会影响葡萄酒的品质。
+
+但柠檬酸与其他性质的分析并没有得到很好的效果。
+
+### 遇到的问题与解决
+单变量分析时，直方图默认生成的组宽一直不够细致，不断进行微调，才得到想要的结果。
+多变量分析时，由于数据集里变量均为连续变量，导致在绘制散点图时一直得不到想要的图形，后来分析发现，多变量的散点图中只需要把quality作为分类变量置于color中即可，其他连续变量设置为x、y轴，这样出来的散点图效果会更加直观。
+总结这次作业，变量的选择，组宽、标尺的设置弄的比较好的话，图形看起来就会非常直观
+
+
+### 如何在未来的工作中丰富分析（例如额外的数据和分析）？
+
+上述数据集包含1599个观测数据的有限数据。在该数据集中，94.9％的葡萄酒质量为5、6、7，分布过于集中，如果样本数据能够扩大且覆盖更多不同品种的葡萄酒，样本量更大的话，可以得到更加有效的分析。
+
