@@ -6,7 +6,11 @@ output:
 WineQualityReds EDA by Shao Jiewei
 ========================================================
 
-```{r echo=FALSE, message=FALSE, warning=FALSE, packages}
+```{r global_options,include=FALSE}
+knitr::opts_chunk$set(message = FALSE, warning = FALSE, echo = FALSE)
+```
+
+```{r echo=FALSE, message=FALSE, packages}
 # Load all of the packages that you end up using
 # in your analysis in this code chunk.
 
@@ -28,7 +32,7 @@ redwine_df <- read.csv('wineQualityReds.csv')
 str(redwine_df)
 ```
 ¿ÉÒÔ¹Û²ìµ½±äÁ¿¡¯X¡®±íÊ¾ÐòÁÐºÅ£¬¶Ô·ÖÎö×÷ÓÃ²»´ó£¬Òò´Ë£¬ÒÆ³ýÁÐ¡®X¡¯
-```{r echo=FALSE, warning=FALSE}
+```{r echo=FALSE}
 # ÒÆ³ýÁÐ ¡®X¡¯
 redwine_df$X <- NULL
 summary(redwine_df)
@@ -41,6 +45,13 @@ summary(redwine_df)
 
 
 # Univariate Plots Section
+```{r}
+# ´´½¨Ö±·½Í¼º¯Êý£¬·½±ã´úÂëÖØÓÃ
+univ_cont <- function(feature){
+  ggplot(aes_string(x = feature), data = redwine_df)+
+    geom_histogram()
+}
+```
 
 ÒªÑÐ¾¿²»Í¬»¯Ñ§³É·Ö¶ÔqualityµÄÓ°Ïì£¬ÏÈ¿´Ò»ÏÂqualityµÄ·Ö²¼Çé¿ö
 ```{r echo=FALSE}
@@ -57,30 +68,18 @@ dim(subset(redwine_df, quality == 5 | quality == 6| quality == 7))/dim(redwine_d
 
 ```{r echo=FALSE}
 # »æÖÆËùÓÐµ¥±äÁ¿µÄÖ±·½Í¼ 
-p1<-ggplot(redwine_df,aes(x = fixed.acidity))+
-  geom_histogram()
-p2<-ggplot(redwine_df,aes(x = volatile.acidity))+
-  geom_histogram()
-p3<-ggplot(redwine_df,aes(x = citric.acid))+
-  geom_histogram()
-p4<-ggplot(redwine_df,aes(x = residual.sugar))+
-  geom_histogram()
-p5<-ggplot(redwine_df,aes(x = chlorides))+
-  geom_histogram()
-p6<-ggplot(redwine_df,aes(x = free.sulfur.dioxide))+
-  geom_histogram()
-p7<-ggplot(redwine_df,aes(x = total.sulfur.dioxide))+
-  geom_histogram()
-p8<-ggplot(redwine_df,aes(x = density))+
-  geom_histogram()
-p9<-ggplot(redwine_df,aes(x = pH))+
-  geom_histogram()
-p10<-ggplot(redwine_df,aes(x = sulphates))+
-  geom_histogram()
-p11<-ggplot(redwine_df,aes(x = alcohol))+
-  geom_histogram()
-p12<-ggplot(redwine_df,aes(x = quality))+
-  geom_bar()
+p1<-univ_cont("fixed.acidity")
+p2<-univ_cont("volatile.acidity")
+p3<-univ_cont("citric.acid")
+p4<-univ_cont("residual.sugar")
+p5<-univ_cont("chlorides")
+p6<-univ_cont("free.sulfur.dioxide")
+p7<-univ_cont("total.sulfur.dioxide")
+p8<-univ_cont("density")
+p9<-univ_cont("pH")
+p10<-univ_cont("sulphates")
+p11<-univ_cont("alcohol")
+p12<-univ_cont("quality")
 
 # Íø¸ñÕ¹Ê¾
 grid.arrange(p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,ncol=4)
@@ -92,8 +91,7 @@ grid.arrange(p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,ncol=4)
 
 ```{r echo=FALSE}
 # »æÖÆ fixed.acidity Ö±·½Í¼
-ggplot(redwine_df, aes(x = fixed.acidity)) +
-  geom_histogram(binwidth = 0.1) +
+univ_cont("fixed.acidity") +
   scale_x_continuous(breaks = seq(4, 16, by = 1))
 
 ```
@@ -106,13 +104,11 @@ summary(redwine_df$fixed.acidity)
 * Ö÷Òª·Ö²¼ÔÚ6-9.2Ö®¼ä,Æ½¾ùÖµÊÇ8.32£¬ÖÐÎ»ÊýÊÇ7.9
 ```{r echo=FALSE}
 # »æÖÆ volatile.acidity Ö±·½Í¼
-pp1 <- ggplot(redwine_df, aes(x = volatile.acidity)) +
-  geom_histogram(binwidth = 0.02) +
+pp1 <- univ_cont("volatile.acidity") +
   scale_x_continuous(breaks = seq(0, 1.6, by = 0.1))
 
 # »æÖÆ volatile.acidity log10Ö±·½Í¼
-pp2 <- ggplot(redwine_df, aes(x = volatile.acidity)) +
-  geom_histogram(binwidth = 0.02) +
+pp2 <- univ_cont("volatile.acidity") +
   scale_x_log10(breaks = seq(0, 1.6, by = 0.5))
 
 # Íø¸ñÕ¹Ê¾
@@ -127,20 +123,16 @@ grid.arrange(pp1, pp2)
 
 ```{r echo=FALSE}
 # »æÖÆ pH Ö±·½Í¼
-p1 <- ggplot(redwine_df, aes(x = pH)) +
-  geom_histogram(binwidth = 0.02)
+p1 <- univ_cont("pH")
 
 # »æÖÆ free.sulfur.dioxide Ö±·½Í¼
-p2 <- ggplot(redwine_df, aes(x = free.sulfur.dioxide)) +
-  geom_histogram(binwidth = 1)
+p2 <- univ_cont("free.sulfur.dioxide")
 
 # »æÖÆ total.sulfur.dioxide Ö±·½Í¼
-p3 <- ggplot(redwine_df, aes(x = total.sulfur.dioxide)) +
-  geom_histogram(binwidth = 3)
+p3 <- univ_cont("total.sulfur.dioxide")
 
 # »æÖÆ alcohol Ö±·½Í¼
-p4 <- ggplot(redwine_df, aes(x = alcohol)) +
-  geom_histogram(binwidth = 0.1)
+p4 <- univ_cont("alcohol")
 
 # Íø¸ñÕ¹Ê¾
 grid.arrange(p1, p2, p3, p4, ncol = 2)
@@ -157,8 +149,7 @@ grid.arrange(p1, p2, p3, p4, ncol = 2)
 ```{r echo=FALSE}
 
 # »æÖÆ residual.sugar Ö±·½Í¼
-ggplot(aes(x = residual.sugar), data = redwine_df)+
-  geom_histogram(binwidth = 0.1) +
+univ_cont("residual.sugar") +
   scale_x_continuous(breaks = seq(0, 16, by = 1))
 
 ```
@@ -167,8 +158,7 @@ ggplot(aes(x = residual.sugar), data = redwine_df)+
 ```{r echo=FALSE}
 
 # »æÖÆ citric.acid Ö±·½Í¼
-ggplot(redwine_df, aes(x = citric.acid)) +
-  geom_histogram(binwidth = 0.02)+
+univ_cont("citric.acid")+
   scale_x_continuous(breaks = seq(0, 1, by = 0.05))
 
 ```
@@ -181,8 +171,7 @@ summary(redwine_df$citric.acid == 0)
 ```{r echo=FALSE}
 
 # »æÖÆ chlorides Ö±·½Í¼
-ggplot(redwine_df, aes(x = chlorides)) +
-  geom_histogram(binwidth = 0.01)+
+univ_cont("chlorides")+
   scale_x_continuous(breaks = seq(0, 0.6, by = 0.05))
 
 ```
@@ -197,8 +186,7 @@ summary(redwine_df$chlorides)
 ```{r echo=FALSE}
 
 # »æÖÆ density Ö±·½Í¼
-ggplot(redwine_df, aes(x = density)) +
-  geom_histogram()
+univ_cont("density")
 
 ```
 
@@ -207,8 +195,7 @@ ggplot(redwine_df, aes(x = density)) +
 ```{r echo=FALSE}
 
 # »æÖÆ sulphates Ö±·½Í¼
-ggplot(redwine_df, aes(x = sulphates)) +
-  geom_histogram(binwidth = 0.02)
+univ_cont("sulphates")
 
 ```
 
@@ -263,12 +250,18 @@ corrplot(M, method = "number")
 ¸ù¾ÝÏà¹ØÐÔ·ÖÎö£¬ÕÒµ½4¸öÓëÖÊÁ¿£¨quality£©Ïà¹ØÐÔ±È½ÏÇ¿µÄ±äÁ¿£¬Ê×ÏÈ·ÖÎöquality¸úvolatile.acidity
 
 ## quality & volatile.acidity
-```{r echo=FALSE, Bivariate_Plots, warning=FALSE}
+```{r echo=FALSE, Bivariate_Plots}
 # »æÖÆquality & volatile.acidityµÄÏäÏßÍ¼
+
 ggplot(data = redwine_df, aes(x = factor(quality), y = volatile.acidity)) +
-  geom_boxplot()
+  geom_boxplot(alpha = .5, color = 'blue')+
+  geom_jitter(alpha = .2)+
+  stat_summary(fun.y = "mean",
+               geom = "point",
+               color = "red")+
+  geom_smooth(method = 'lm', aes(group = 1))
 ```
-```{r echo=FALSE, warning=FALSE}
+```{r echo=FALSE}
 
 # ¼ÆËãquality & volatile.acidityµÄÏà¹ØÏµÊý
 cor.test(redwine_df$quality, redwine_df$volatile.acidity, method = 'pearson')
@@ -278,12 +271,17 @@ cor.test(redwine_df$quality, redwine_df$volatile.acidity, method = 'pearson')
 
 ## quality & alcohol
 
-```{r echo=FALSE, warning=FALSE}
+```{r echo=FALSE}
 # »æÖÆquality & alcoholµÄÏäÏßÍ¼
 ggplot(data = redwine_df, aes(x = factor(quality), y = alcohol)) +
-  geom_boxplot()
+  geom_boxplot(alpha = .5, color = 'blue') +
+  geom_jitter(alpha = .2)+
+  stat_summary(fun.y = "mean",
+               geom = "point",
+               color = "red")+
+  geom_smooth(method = 'lm', aes(group = 1))
 ```
-```{r echo=FALSE, warning=FALSE}
+```{r echo=FALSE}
 
 # ¼ÆËãquality & alcoholµÄÏà¹ØÏµÊý
 cor.test(redwine_df$quality, redwine_df$alcohol, method = 'pearson')
@@ -293,13 +291,19 @@ cor.test(redwine_df$quality, redwine_df$alcohol, method = 'pearson')
 
 ## quality & citric.acid
 
-```{r echo=FALSE, warning=FALSE}
+```{r echo=FALSE}
 # »æÖÆquality & citric.acid
 ggplot(data = redwine_df, aes(x = factor(quality), y = citric.acid)) +
-  geom_boxplot()
+  geom_boxplot(alpha = .5, color = 'blue')+
+  geom_jitter(alpha = .2)+
+  stat_summary(fun.y = "mean",
+               geom = "point",
+               color = "red")+
+  geom_smooth(method = 'lm', aes(group = 1))
+
 ```
 
-```{r echo=FALSE, warning=FALSE}
+```{r echo=FALSE}
 
 # ¼ÆËãquality & citric.acidµÄÏà¹ØÏµÊý
 cor.test(redwine_df$quality, redwine_df$citric.acid, method = 'pearson')
@@ -309,13 +313,18 @@ citric.acidÓëquality³ÊÈõµÄÕýÏà¹Ø£¬Ïà¹ØÏµÊýÎª0.22£¬qualityËæcitric.acidµÄÔö³¤¶øÔö
 
 ## quality & sulphates
 
-```{r echo=FALSE, warning=FALSE}
+```{r echo=FALSE}
 # »æÖÆquality & citric.acid
 ggplot(data = redwine_df, aes(x = factor(quality), y = sulphates)) +
-  geom_boxplot()
+  geom_boxplot(alpha = .5, color = 'blue') +
+  geom_jitter(alpha = .2)+
+  stat_summary(fun.y = "mean",
+               geom = "point",
+               color = "red")+
+  geom_smooth(method = 'lm', aes(group = 1))
 ```
 
-```{r echo=FALSE, warning=FALSE}
+```{r echo=FALSE}
 
 # ¼ÆËãquality & citric.acidµÄÏà¹ØÏµÊý
 cor.test(redwine_df$quality, redwine_df$sulphates, method = 'pearson')
@@ -341,7 +350,7 @@ fixed.acidityÓëpH Ïà¹ØÐÔ×î´ó,´ïµ½-0.68£¬·Ç»ÓÐÔËá±¾Éí¾Í»áÓ°ÏìpHÖµ£¬¿ÉÒÔÀí½â
 
 ¸ù¾ÝÉÏÃæµÄ·ÖÎö½á¹û£¬ÎÒÃÇ·¢ÏÖalcoholÓëqualityÖ®¼ä´æÔÚ½ÏÇ¿µÄÏà¹ØÐÔ£¬½ÓÏÂÀ´ÎÒÃÇÌ½Ë÷Ò»ÏÂalcoholÓëqualityºÍvolatile.acidity¡¢citric.acid¡¢sulphatesÖ®¼äµÄ¹ØÏµ
 
-```{r echo=FALSE, Multivariate_Plots, warning=FALSE}
+```{r echo=FALSE, Multivariate_Plots}
 # »æÖÆalcohol vs quality vs volatile.acidity
 ggplot(aes(x = alcohol, y = volatile.acidity, color = factor(quality)), data = redwine_df) +
 geom_jitter(alpha = 0.2) +
@@ -349,7 +358,7 @@ scale_color_brewer(palette = "Blues") +
 ylim(0.2,0.9) +
 geom_smooth(method = "lm", se = FALSE,size=1) 
 ```
-```{r echo=FALSE, warning=FALSE}
+```{r echo=FALSE}
 # »æÖÆalcohol & quality Óëcitric.acidµÄÉ¢µãÍ¼ 
 ggplot(aes(x = alcohol, y = citric.acid, color = factor(quality)), data = redwine_df) +
 geom_jitter(alpha = 0.2) +
@@ -358,7 +367,7 @@ ylim(0,0.8) +
 geom_smooth(method = "lm", se = FALSE,size=1) 
   
 ```
-```{r echo=FALSE, warning=FALSE}
+```{r echo=FALSE}
 # »æÖÆalcohol & quality ÓësulphatesµÄÉ¢µãÍ¼
 ggplot(aes(x = alcohol, y = sulphates, color = factor(quality)), data = redwine_df) +
 geom_jitter(alpha = 0.2) +
@@ -381,7 +390,7 @@ geom_smooth(method = "lm", se = FALSE,size=1)
 ## volatile.acidity & quality Óë alcohol¡¢citric.acid¡¢sulphates
 
 
-```{r echo=FALSE, warning=FALSE}
+```{r echo=FALSE}
 # »æÖÆvolatile.acidity vs quality vs alcoholµÄÉ¢µãÍ¼
 ggplot(aes(x = volatile.acidity, y = alcohol, color = factor(quality)), data = redwine_df) +
 geom_jitter(alpha = 0.2) +
@@ -390,7 +399,7 @@ xlim(0.2,0.9) +
 geom_smooth(method = "lm", se = FALSE,size=1) 
 ```
 
-```{r echo=FALSE, warning=FALSE}
+```{r echo=FALSE}
 # »æÖÆvolatile.acidity vs quality vs citric.acidµÄÉ¢µãÍ¼
 ggplot(aes(x = volatile.acidity, y = citric.acid, color = factor(quality)), data = redwine_df) +
 geom_jitter(alpha = 0.2) +
@@ -400,7 +409,7 @@ ylim(0,0.8)+
 geom_smooth(method = "lm", se = FALSE,size=1)   
 ```
 
-```{r echo=FALSE, warning=FALSE}
+```{r echo=FALSE}
 # »æÖÆvolatile.acidity vs quality vs sulphatesµÄÉ¢µãÍ¼
 ggplot(aes(x = volatile.acidity, y = sulphates, color = factor(quality)), data = redwine_df) +
 geom_jitter(alpha = 0.2) +
@@ -413,7 +422,7 @@ geom_smooth(method = "lm", se = FALSE,size=1)
 
 ¿ÉÒÔ¿´³övolatile.acidityÔ½µÍ£¬ºìÆÏÌÑ¾ÆµÄÆ·ÖÊÔ½ºÃ¡£
 
-```{r echo=FALSE, warning=FALSE}
+```{r echo=FALSE}
 # »æÖÆcitric.acid vs quality vs alcoholµÄÉ¢µãÍ¼
 ggplot(aes(x = citric.acid, y = alcohol, color = factor(quality)), data = redwine_df) +
 geom_jitter(alpha = 0.3) +
@@ -422,7 +431,7 @@ xlim(0,0.8) +
 geom_smooth(method = "lm", se = FALSE,size=1) 
   
 ``` 
-```{r echo=FALSE, warning=FALSE}
+```{r echo=FALSE}
 # »æÖÆcitric.acid vs quality vs volatile.acidityµÄÉ¢µãÍ¼
 ggplot(aes(x = citric.acid, y = volatile.acidity, color = factor(quality)), data = redwine_df) +
 geom_jitter(alpha = 0.3) +
@@ -433,7 +442,7 @@ geom_smooth(method = "lm", se = FALSE,size=1)
   
 ```
 
-```{r echo=FALSE, warning=FALSE}
+```{r echo=FALSE}
 # »æÖÆcitric.acid vs quality vs sulphatesµÄÉ¢µãÍ¼
 ggplot(aes(x = citric.acid, y = sulphates, color = factor(quality)), data = redwine_df) +
 geom_jitter(alpha = 0.3) +
@@ -445,7 +454,7 @@ geom_smooth(method = "lm", se = FALSE,size=1)
 
 ¿ÉÒÔ¿´³öcitric.acid¶Ôºì¾ÆÆ·ÖÊÃ»ÓÐÃ÷ÏÔµÄÓ°Ïì
 
-```{r echo=FALSE, warning=FALSE}
+```{r echo=FALSE}
 # »æÖÆsulphates vs quality vs alcoholµÄÉ¢µãÍ¼
 ggplot(aes(x = sulphates , y = alcohol, color = factor(quality)), data = redwine_df) +
 geom_jitter(alpha = 0.3) +
@@ -454,7 +463,7 @@ xlim(0.3,1.0)+
 geom_smooth(method = "lm", se = FALSE,size=1) 
   
 ``` 
-```{r echo=FALSE, warning=FALSE}
+```{r echo=FALSE}
 # »æÖÆsulphates vs quality vs volatile.acidityµÄÉ¢µãÍ¼
 ggplot(aes(x = sulphates , y = volatile.acidity, color = factor(quality)), data = redwine_df) +
 geom_jitter(alpha = 0.3) +
@@ -464,7 +473,7 @@ ylim(0.2,1.0) +
 geom_smooth(method = "lm", se = FALSE,size=1) 
 ``` 
 
-```{r echo=FALSE, warning=FALSE}
+```{r echo=FALSE}
 # »æÖÆsulphates vs quality vs citric.acidµÄÉ¢µãÍ¼
 ggplot(aes(x = sulphates , y = citric.acid, color = factor(quality)), data = redwine_df) +
 geom_jitter(alpha = 0.3) +
@@ -492,7 +501,7 @@ citric.acidµ¥¶À¶Ôºì¾ÆÆ·ÖÊÓ°ÏìÓÐÏÞ£¬µ«citric.acidºÍalcoholÖµ½Ï¸ßÊ±£¬¶ÔÆÏÌÑ¾ÆµÄÆ·Ö
 # Final Plots and Summary
 
 ### Plot One
-```{r echo=FALSE, Plot_One, warning=FALSE}
+```{r echo=FALSE, Plot_One}
 # »æÖÆ quality ÌõÐÎÍ¼
 ggplot(aes(x = quality), data = redwine_df) +
   geom_bar()+
@@ -509,7 +518,7 @@ ggplot(aes(x = quality), data = redwine_df) +
 ### Plot Two
 
 ### alcohol & quality Óëvolatile.acidity
-```{r echo=FALSE, Plot_Two, warning=FALSE}
+```{r echo=FALSE, Plot_Two}
 # »æÖÆalcohol vs quality vs volatile.acidityµÄÉ¢µãÍ¼
 ggplot(aes(x = alcohol, y = volatile.acidity, color = factor(quality)), data = redwine_df) +
 geom_jitter(alpha = 0.3) +
@@ -530,7 +539,7 @@ ggtitle("volatile.acidity VS alcohol VS quality")
 
 ### Plot Three
 ### alcohol & quality Óësulphatese
-```{r echo=FALSE, Plot_Three, warning=FALSE}
+```{r echo=FALSE, Plot_Three}
 # »æÖÆalcohol vs quality vs sulphatesÉ¢µãÍ¼
 ggplot(aes(x = alcohol, y = sulphates, color = factor(quality)), data = redwine_df) +
 geom_jitter(alpha = 0.3) +
