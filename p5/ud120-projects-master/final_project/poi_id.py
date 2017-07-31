@@ -13,11 +13,31 @@ from tester import dump_classifier_and_data
 ### Task 1: Select what features you'll use.
 ### features_list is a list of strings, each of which is a feature name.
 ### The first feature must be "poi".
-features_list = ['poi','salary', 'expenses', 'total_stock_value', 'bonus', 'from_poi_to_this_person', 'shared_receipt_with_poi'] # You will need to use more features
+features_list = ['poi',
+                 'salary',
+                 'expenses', 
+                 'total_stock_value',
+                 'bonus', 
+                 'from_poi_to_this_person',
+                 'shared_receipt_with_poi'] # You will need to use more features
 
-financial_features = ['salary', 'deferral_payments', 'total_payments', 'loan_advances', 'bonus', 'restricted_stock_deferred', 'deferred_income', 'total_stock_value',
-'expenses', 'exercised_stock_options', 'other', 'long_term_incentive', 'restricted_stock', 'director_fees']
-email_features = ['to_messages', 'email_address', 'from_poi_to_this_person', 'from_messages', 'from_this_person_to_poi', 'shared_receipt_with_poi']
+financial_features = ['salary', 
+                      'deferral_payments', 
+                      'total_payments', 'loan_advances', 
+                      'bonus', 'restricted_stock_deferred', 
+                      'deferred_income', 
+                      'total_stock_value',
+                      'expenses',
+                      'exercised_stock_options',
+                      'other', 'long_term_incentive',
+                      'restricted_stock', 
+                      'director_fees']
+email_features = ['to_messages', 
+                  'email_address', 
+                  'from_poi_to_this_person', 
+                  'from_messages', 
+                  'from_this_person_to_poi', 
+                  'shared_receipt_with_poi']
 POI_label = ['poi']
 total_features = POI_label + financial_features + email_features
 
@@ -71,11 +91,11 @@ def show_scatter_plot(dataset, feature1, feature2):
     plt.show()
 
 # identify outliers
-# show_scatter_plot(data_dict, "salary", "bonus")
+show_scatter_plot(data_dict, "salary", "bonus")
 
 # remove them
 data_dict.pop( "TOTAL", 0 )
-# show_scatter_plot(data_dict, "salary", "bonus")
+show_scatter_plot(data_dict, "salary", "bonus")
 
 ### Task 3: Create new feature(s)
 ### Store to my_dataset for easy export below.
@@ -159,65 +179,7 @@ new_features = scaler.fit_transform(new_features)
 ### you'll need to use Pipelines. For more info:
 ### http://scikit-learn.org/stable/modules/pipeline.html
 
-# split 40% of the data for testing
-# from sklearn.cross_validation import train_test_split
-# from sklearn import cross_validation
-# features_train, features_test, labels_train, labels_test = \
-#     cross_validation.train_test_split(features, labels, test_size=0.3, random_state=42)
 
-# from sklearn.metrics import accuracy_score, precision_score, recall_score
-
-# # Provided to give you a starting point. Try a variety of classifiers.
-# from sklearn.naive_bayes import GaussianNB
-# from time import time
-# clf1 = GaussianNB()
-# clf1.fit(features_train, labels_train)
-# pred = clf1.predict(features_test)
-# # nb_score = clf1.score(features_test, labels_test)
-
-# nb_acc = accuracy_score(labels_test, pred)
-# nb_pre = precision_score(labels_test, pred)
-# nb_rec = recall_score(labels_test, pred)
-# # print "NB accuracy: ", nb_acc
-# # print "NB precision: ", nb_pre
-# # print "NB recall: ", nb_rec
-
-# from sklearn import tree
-# clf2 = tree.DecisionTreeClassifier()
-# clf2.fit(features_train, labels_train)
-# pred = clf2.predict(features_test)
-# # dt_score = clf2.score(features_test, labels_test)
-
-# dt_acc = accuracy_score(labels_test, pred)
-# dt_pre = precision_score(labels_test, pred)
-# dt_rec = recall_score(labels_test, pred)
-# print "DT accuracy: ", dt_acc
-# print "DT precision: ", dt_pre
-# print "DT recall: ", dt_rec
-
-# from sklearn.ensemble import RandomForestClassifier
-# clf3 = RandomForestClassifier(n_estimators=10)
-# clf3.fit(features_train, labels_train)
-# pred = clf3.predict(features_test)
-# # rf_score = clf3.score(features_test, labels_test)
-
-# rf_acc = accuracy_score(labels_test, pred)
-# rf_pre = precision_score(labels_test, pred)
-# rf_rec = recall_score(labels_test, pred)
-# print "RF accuracy: ", rf_acc
-# print "RF precision: ", rf_pre
-# print "RF recall: ", rf_rec
-
-# from sklearn.linear_model import LogisticRegression
-# clf4 = LogisticRegression(C=1e5)
-# clf4.fit(features_train, labels_train)
-# pred = clf4.predict(features_test)
-# lr_acc = accuracy_score(labels_test, pred)
-# lr_pre = precision_score(labels_test, pred)
-# lr_rec = recall_score(labels_test, pred)
-# print "LR accuracy: ", lr_acc
-# print "LR precision: ", lr_pre
-# print "LR recall: ", lr_rec
 
 from sklearn.cross_validation import train_test_split
 from sklearn.metrics import accuracy_score, precision_score, recall_score
@@ -259,7 +221,7 @@ nb_param = {}
 nb_grid_search = GridSearchCV(estimator = nb_clf, param_grid = nb_param)
 print("Naive Bayes model evaluation")
 tune_params(nb_grid_search, features, labels, nb_param)
-# tune_params(nb_grid_search, new_features, new_labels, nb_param)
+tune_params(nb_grid_search, new_features, new_labels, nb_param)
 
 
 # 2. Support Vector Machines
@@ -271,8 +233,8 @@ svm_param = {'kernel':('linear', 'rbf', 'sigmoid'),
 svm_grid_search = GridSearchCV(estimator = svm_clf, param_grid = svm_param)
 
 print("SVM model evaluation")
-# tune_params(svm_grid_search, features, labels, svm_param)
-# tune_params(svm_grid_search, new_features, new_labels, svm_param)
+tune_params(svm_grid_search, features, labels, svm_param)
+tune_params(svm_grid_search, new_features, new_labels, svm_param)
 
 
 # 3. Decision Tree
@@ -283,8 +245,8 @@ dt_param = {'criterion':('gini', 'entropy'),
 dt_grid_search = GridSearchCV(estimator = dt_clf, param_grid = dt_param)
 
 print("Decision Tree model evaluation")
-# tune_params(dt_grid_search, features, labels, dt_param)
-# tune_params(dt_grid_search, new_features, new_labels, dt_param)
+tune_params(dt_grid_search, features, labels, dt_param)
+tune_params(dt_grid_search, new_features, new_labels, dt_param)
 
 # 4. Random Forest
 from sklearn.ensemble import RandomForestClassifier
@@ -293,8 +255,8 @@ rf_param = {}
 rf_grid_search = GridSearchCV(estimator = rf_clf, param_grid = rf_param)
 
 print("Random Forest model evaluation")
-# tune_params(rf_grid_search, features, labels, rf_param)
-# tune_params(rf_grid_search, new_features, new_labels, rf_param)
+tune_params(rf_grid_search, features, labels, rf_param)
+tune_params(rf_grid_search, new_features, new_labels, rf_param)
 
 # 5. Logistic Regression
 from sklearn.linear_model import LogisticRegression
@@ -304,8 +266,8 @@ lr_param = {'tol': [1, 0.1, 0.01, 0.001, 0.0001],
 lr_grid_search = GridSearchCV(estimator = lr_clf, param_grid = lr_param)
 
 print("Logistic Regression model evaluation")
-# tune_params(lr_grid_search, features, labels, lr_param)
-# tune_params(lr_grid_search, new_features, new_labels, lr_param)
+tune_params(lr_grid_search, features, labels, lr_param)
+tune_params(lr_grid_search, new_features, new_labels, lr_param)
 
 
 ### Task 5: Tune your classifier to achieve better than .3 precision and recall 
@@ -316,9 +278,9 @@ print("Logistic Regression model evaluation")
 ### http://scikit-learn.org/stable/modules/generated/sklearn.cross_validation.StratifiedShuffleSplit.html
 
 # Example starting point. Try investigating other evaluation techniques!
-from sklearn.cross_validation import train_test_split
-features_train, features_test, labels_train, labels_test = \
-    train_test_split(features, labels, test_size=0.3, random_state=42)
+
+#features_train, features_test, labels_train, labels_test = \
+#    train_test_split(features, labels, test_size=0.3, random_state=42)
 
 # from sklearn.cross_validation import StratifiedShuffleSplit
 # def test_classifier(clf, dataset, feature_list, folds = 1000):
