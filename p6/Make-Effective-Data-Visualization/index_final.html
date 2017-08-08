@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<script src="http://d3js.org/d3.v3.min.js"></script>
+		<script src="http://dimplejs.org/dist/dimple.v2.0.0.min.js"></script>
+		<style>
+			h2 {
+				text-align: center;
+			}
+			p {
+				width: 1125px;
+				margin-left: 75px;
+			}
+		</style>
+		<script type="text/javascript">
+			function draw(data) {
+			/* 创建气泡与线性图，可视化选手击球率与身高、用手习惯、全垒打的关系
+			并制作可与观众交互的图形
+			*/
+				"use strict";
+				var margin = 100,
+					width = 1300 - margin,
+					height = 700 - margin;
+
+				// 增加标题
+				d3.select('body')
+					.append('h2')
+					.text('棒球运动员平均击球率与身高、用手习惯、全垒打的关系');
+				// 增加描述
+				d3.select('body')
+					.append('p')
+					.text('一个包含1,157 名棒球手的数据集，包括他们的用手习惯（左手还是右手）、身高（英寸）、体重（磅）、击球率和全垒得分。 页面上有2个图: 第一个是身高与全垒得分、击球率的关系, 第二个是身高、用手习惯与击球率的关系');
+
+
+				// 创建击球率与身高、全垒打的关系
+				var svg = dimple.newSvg('body', width, height);
+				var chart = new dimple.chart(svg, data);
+
+				// 增加标题
+				svg.append('text')
+					.attr('x', chart._xPixels() + chart._widthPixels() / 2)
+					.attr('y', chart._yPixels() - 20)
+					.style('text-anchor', 'middle')
+					.style('font-family', 'sans-serif')
+					.style('font-weight', 'bold')
+					.style('font-size', '14')
+					.text('平均击球率与身高、全垒打的关系');
+
+				var chart_x = chart.addCategoryAxis('x', 'height');
+				chart_x.title = '身高（英寸）';
+				chart_x.fontSize = 'auto';
+
+				var chart_y = chart.addMeasureAxis('y', 'avg');
+				chart_y.title = '平均击球率';
+				chart_y.showGridlines = false;
+		 		chart_y.tickFormat = '.3f';
+				chart_y.fontSize = 'auto';
+
+				var chart_z = chart.addMeasureAxis('z', 'HR');
+
+				var bubble = chart.addSeries('全垒打', dimple.plot.bubble);
+				bubble.aggregate = dimple.aggregateMethod.avg;
+				var line = chart.addSeries('击球率', dimple.plot.line);
+				line.aggregate = dimple.aggregateMethod.avg;
+
+				// 增加一个图例
+				var myLegend = chart.addLegend(115, 250, 1100, 20, 'right');
+
+				// 绘图
+				chart.draw();
+
+				// 鼠标悬浮气泡上时，更改标签
+				bubble.getTooltipText = function (e) {
+					return ['身高（英寸）: ' + e.cx,
+						'平均击球率: ' + e.cy,
+						'全垒打总数 ' + e.cz];
+				};
+
+				// 鼠标悬浮线性图上时，更改标签
+				line.getTooltipText = function (e) {
+						return ['Height of a player: ' + e.cx,
+							'Batting Average of a player: ' + e.cy];
+				};
+
+				// 改变图例的位置
+				d3.select('.dimple-legend.dimple-legend-text.dimple-batting-average')
+					.attr('x', 1108.34375)
+					.attr('y', 256.969696969697)
+					.attr('font-size', '11px');
+				d3.select('.dimple-legend.dimple-legend-key.dimple-batting-average')
+					.attr('x', 1088.34375)
+					.attr('y', 250);
+				d3.select('.dimple-legend.dimple-legend-text.dimple-home-runs')
+					.attr('x', 1108.34375)
+					.attr('y', 281.969696969697)
+					.attr('font-size', '11px');
+				d3.select('.dimple-legend.dimple-legend-key.dimple-home-runs')
+					.attr('x', 1088.34375)
+					.attr('y', 275);
+
+				// 增加描述
+				d3.select('body')
+					.append('p')
+					.text('气泡大小代表全垒打的总数的不同， 在图中可以看出小个子的平均击球率比较高，中间身高的球员全垒打次数比较稳定');
+
+				// 创建线性图与气泡图，展示平均击球率与身高、全垒打、用手习惯的不同
+				var svg = dimple.newSvg('body', width, height);
+				var chart = new dimple.chart(svg, data);
+				chart.defaultColors = [
+					new dimple.color('#99d8c9'),
+					new dimple.color('#a1d99b'),
+					new dimple.color('#2ca25f')];
+
+				// 增加标题
+				svg.append('text')
+					.attr('x', chart._xPixels() + chart._widthPixels() / 2)
+					.attr('y', chart._yPixels() - 20)
+					.style('text-anchor', 'middle')
+					.style('font-family', 'sans-serif')
+					.style('font-weight', 'bold')
+					.style('font-size', '14')
+					.text('平均击球率与身高、用手习惯、全垒打的关系');
+
+				var chart_x = chart.addCategoryAxis('x', ['height', 'handedness']);
+				chart_x.title = '身高（英寸）';
+				chart_x.fontSize = 'auto';
+
+				var chart_y = chart.addMeasureAxis('y', 'avg');
+				chart_y.title = '平均击球率';
+				chart_y.showGridlines = false;
+				chart_y.tickFormat = '.3f';
+				chart_y.fontSize = 'auto';
+
+				var chart_z = chart.addMeasureAxis('z', 'HR');
+
+				var bubble = chart.addSeries('handedness',  dimple.plot.bubble);
+				bubble.aggregate = dimple.aggregateMethod.avg;
+				bubble.addOrderRule(['R','L','B'], false);
+
+				var line = chart.addSeries('handedness',  dimple.plot.line);
+				line.aggregate = dimple.aggregateMethod.avg;
+				line.addOrderRule(['R','L','B'], false);
+				line.lineWeight = 1;
+
+				// 增加图例标题 
+				svg.selectAll('title_text')
+					.data(['点击小矩形','显示/隐藏 用手习惯:'])
+					.enter()
+					.append('text')
+						.attr('x', 1085)
+						.attr('y', function (d, i) { return 215 + i * 14; })
+						.style('font-family', 'sans-serif')
+						.style('font-size', '11px')
+						.style('color', 'Black')
+						.text(function (d) { return d; });
+
+				// 增加图例
+				var myLegend = chart.addLegend(111, 250, 1100, 20, 'right');
+
+				// 绘图
+				chart.draw();
+
+				// 鼠标悬浮气泡上时，改变标签
+				bubble.getTooltipText = function(e) {
+					return ['身高（英寸）: ' + e.cx, 
+							'平均击球率: ' + e.cy, 
+							'全垒打总数: ' + e.cz];
+				};
+
+				// 鼠标悬浮线性图上时，改变标签
+				line.getTooltipText = function(e) {
+					return ['身高（英寸）: ' + e.cx, 
+							'平均击球率: ' + e.cy];
+				};
+
+				// 更改图例上的名称
+				d3.select('.dimple-legend-text.dimple-b')
+					.text('双手')
+					.attr('font-size', '11px')
+					.attr('x', 1108.34375);
+				d3.select('.dimple-legend-text.dimple-l')
+					.text('左手')
+					.attr('x', 1108.34375)
+					.attr('y', 281.969696969697)
+					.attr('font-size', '11px');
+				d3.select('.dimple-legend-key.dimple-l')
+					.attr('x', 1088.34375)
+					.attr('y', 275);
+				d3.select('.dimple-legend-text.dimple-r')
+					.text('右手')
+					.attr('x', 1108.34375)
+					.attr('y', 306.969696969697)
+					.attr('font-size', '11px');;
+				d3.select('.dimple-legend-key.dimple-r')
+					.attr('x', 1088.34375)
+					.attr('y', 300);
+
+				// 增加描述
+				d3.select('body')
+					.append('p')
+					.text('不同颜色代表不同的用手习惯, 不同气泡大小代表不同的全垒打总数. 这个图是可以互动的. 你可以自己选择想看的信息. 如果点击右边图例上的小矩形，就会隐藏相关的信息。从图中可以发现，习惯左手与双手的选手表现更好');
+
+				/* 通过点击不同矩形图例，显示或隐藏图形
+				*/
+				chart.legends = [];
+
+				// 获取唯一的用手习惯列表
+				var filterValues = dimple.getUniqueValues(data, 'handedness');
+				// 获取所有的矩形图
+				myLegend.shapes.select('rect')
+					// 给每个矩形增加点击事件
+					.on('click', function (e) {
+						// hide 标记图形是否隐藏
+						var hide = false;
+						var newFilters = [];
+						// 如果 过滤器中有点击，就隐藏
+						filterValues.forEach(function (f) {
+							if (f === e.aggField.slice(-1)[0]) {
+								hide = true;
+							} else {
+								newFilters.push(f);
+							}
+						});
+						// 隐藏或显示图形
+						if (hide) {
+							d3.select(this).style('opacity', 0.2);
+						} else {
+							newFilters.push(e.aggField.slice(-1)[0]);
+							d3.select(this).style('opacity', 0.8);
+						}
+						// 更新过滤器
+						filterValues = newFilters;
+						// 过滤数据
+						chart.data = dimple.filterData(data, 'handedness', 
+							filterValues);
+						// 更新图形
+						chart.draw();
+				});
+			};
+		</script>
+	</head>
+	<body>
+		<script type='text/javascript'>
+		/*
+		加载CSV 文件
+		传递数据给draw 函数
+		*/
+			d3.csv('baseball_data.csv', draw);
+		</script>
+	</body>
+</html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<script src="http://d3js.org/d3.v3.min.js"></script>
+		<script src="http://dimplejs.org/dist/dimple.v2.0.0.min.js"></script>
+		<style>
+			h2 {
+				text-align: center;
+			}
+		</style>
+		<script type="text/javascript">
+			function draw(data) {
+			/* 创建气泡与线性图，可视化选手击球率与身高、用手习惯、全垒打的关系
+			并制作可与观众交互的图形
+			*/
+				"use strict";
+				var margin = 100,
+					width = 1300 - margin,
+					height = 700 - margin;
+
+				// 增加标题
+				d3.select("body")
+					.append("h2")
+					.text("棒球运动员平均击球率与身高、用手习惯、全垒打的关系");
+
+				// 创建线性与气泡图
+				var svg = dimple.newSvg("body", width, height);
+				var chart = new dimple.chart(svg, data);
+				chart.defaultColors = [
+					new dimple.color("#99d8c9"),
+					new dimple.color("#a1d99b"),
+					new dimple.color("#2ca25f")]
+
+				var chart_x = chart.addCategoryAxis("x", ["height", "handedness"]);
+				chart_x.title = "height";
+
+				var chart_y = chart.addMeasureAxis("y", "avg");
+				chart_y.title = "avg";
+				chart_y.showGridlines = false;
+
+				var bubble = chart.addSeries("handedness",  dimple.plot.bubble);
+				bubble.aggregate = dimple.aggregateMethod.avg;
+				bubble.addOrderRule(['R','L','B'], false);
+
+				var line = chart.addSeries("handedness",  dimple.plot.line);
+				line.aggregate = dimple.aggregateMethod.avg;
+				line.addOrderRule(['R','L','B'], false);
+				line.lineWeight = 1;
+
+				// 增加图例
+				chart.addLegend(115, 250, 1100, 20, "right");
+
+				// 绘图
+				chart.draw();
+			};
+		</script>
+	</head>
+	<body>
+		<script type="text/javascript">
+		/*
+		加载CSV 文件
+		传递数据给draw 函数
+		*/
+			d3.csv("baseball_data.csv", draw);
+		</script>
+	</body>
+</html>

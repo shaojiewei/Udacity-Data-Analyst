@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<script src="http://d3js.org/d3.v3.min.js"></script>
+		<script src="http://dimplejs.org/dist/dimple.v2.0.0.min.js"></script>
+		<style>
+			h2 {
+			text-align: center;
+			}
+		</style>
+		<script type="text/javascript">
+			function draw(data) {
+			/* 创建气泡与线性图，可视化选手击球率与身高、用手习惯、全垒打的关系
+			并制作可与观众交互的图形
+			*/
+				"use strict";
+				var margin = 100,
+					width = 1300 - margin,
+					height = 700 - margin;
+
+				// 增加标题
+				d3.select("body")
+					.append("h2")
+					.text("棒球运动员平均击球率与身高、用手习惯、全垒打的关系");
+				// 增加描述
+				d3.select('body')
+					.append('p')
+					.text('一个包含1,157 名棒球手的数据集，包括他们的用手习惯（左手还是右手）、身高（英寸）、体重（磅）、击球率和全垒得分。 页面上有2个图: 第一个是身高与全垒得分、击球率的关系, 第二个是身高、用手习惯与击球率的关系');
+
+				// 创建线性与气泡图
+				var svg = dimple.newSvg("body", width, height);
+				var chart = new dimple.chart(svg, data);
+				chart.defaultColors = [
+					new dimple.color("#99d8c9"),
+					new dimple.color("#a1d99b"),
+					new dimple.color("#2ca25f")]
+
+				var chart_x = chart.addCategoryAxis("x", ["height", "handedness"]);
+				chart_x.title = "身高（英寸）";
+				chart_x.fontSize = "auto";
+
+				var chart_y = chart.addMeasureAxis("y", "avg");
+				chart_y.title = "平均击球率";
+				chart_y.showGridlines = false;
+				chart_y.tickFormat = ".3f";
+				chart_y.fontSize = "auto";
+
+				var chart_z = chart.addMeasureAxis("z", "HR");
+
+				var bubble = chart.addSeries("handedness",  dimple.plot.bubble);
+				bubble.aggregate = dimple.aggregateMethod.avg;
+				bubble.addOrderRule(['R','L','B'], false);
+
+				var line = chart.addSeries("handedness",  dimple.plot.line);
+				line.aggregate = dimple.aggregateMethod.avg;
+				line.addOrderRule(['R','L','B'], false);
+				line.lineWeight = 1;
+
+				// 增加一个图例
+				svg.selectAll("title_text")
+					.data(["用手习惯:"])
+					.enter()
+					.append("text")
+						.attr("x", 1085)
+						.attr("y", 225)
+						.style("font-family", "sans-serif")
+						.style("font-size", "12px")
+						.style("color", "Black")
+						.text(function (d) { return d; });
+				chart.addLegend(115, 250, 1100, 20, "right");
+
+				// 绘图
+				chart.draw();
+
+				// 更改图例名称
+				d3.select('.dimple-legend-text.dimple-b')
+					.text("双手")
+					.attr("font-size", "11px");
+				d3.select('.dimple-legend-text.dimple-l')
+					.text("左手")
+					.attr("x", 1108.34375)
+					.attr("y", 281.969696969697)
+					.attr("font-size", "11px");
+				d3.select('.dimple-legend-key.dimple-l')
+					.attr("x", 1088.34375)
+					.attr("y", 275);
+				d3.select('.dimple-legend-text.dimple-r')
+					.text("右手")
+					.attr("x", 1108.34375)
+					.attr("y", 306.969696969697)
+					.attr("font-size", "11px");;
+				d3.select('.dimple-legend-key.dimple-r')
+					.attr("x", 1088.34375)
+					.attr("y", 300);
+			};
+		</script>
+	</head>
+	<body>
+		<script type="text/javascript">
+		/*
+		加载CSV 文件
+		传递数据给draw 函数
+		*/
+		d3.csv("baseball_data.csv", draw);
+		</script>
+	</body>
+</html>
